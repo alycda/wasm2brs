@@ -2080,15 +2080,24 @@ void CWriter::Write(const LoadExpr& expr) {
     case Opcode::I32Load: int_size = 4; break;
     case Opcode::I32Load8U: int_size = 1; break;
     case Opcode::I32Load16U: int_size = 2; break;
+    case Opcode::I64Load: int_size = 8; break;
+    case Opcode::I64Load8U: int_size = 1; break;
+    case Opcode::I64Load16U: int_size = 2; break;
+    case Opcode::I64Load32U: int_size = 4; break;
+    case Opcode::I64Load32S: int_size = 4; break;
   }
 
   // Special case for loading unsigned integer bytes (faster than calling)
-  // We'd like to handle all the integer operations such as I64, but we need to handle casting back to I64
   if (int_size != 0) {
     wabt::Address expr_offset_or_zero = expr.offset;
 
-    // Extra special case for I32Load where we can use GetSignedLong if it's 4 byte aligned
-    if (expr.opcode == Opcode::I32Load) {
+    // Special cases where we can use GetSignedLong if it's 4 byte aligned
+    const bool possible_aligned_load =
+      expr.opcode == Opcode::I32Load    ||
+      expr.opcode == Opcode::I64Load32S ||
+      expr.opcode == Opcode::I64Load    ||
+      expr.opcode == Opcode::I64Load32U;
+    if (possible_aligned_load) {
       if (expr_offset_or_zero != 0) {
         Write(StackVar(0), " += ", expr_offset_or_zero, Newline());
         expr_offset_or_zero = 0;
@@ -2108,15 +2117,34 @@ void CWriter::Write(const LoadExpr& expr) {
       }
       Write("]");
       if (i != 0) {
-        Write(" << ", i * 8, i >= 4 ? "&" : "");
+        Write(" << ", i * 8, int_size > 4 ? "&" : "");
       }
       Write(")");
     }
+    if (expr.opcode == Opcode::I64Load32U) {
+      Write(" And &HFFFFFFFF&");
+    }
     Write(Newline());
 
-    if (expr.opcode == Opcode::I32Load) {
+    if (possible_aligned_load) {
       Write(CloseBrace(), "Else", OpenBrace());
-      Write(StackVar(0, result_type), " = mem.GetSignedLong(", StackVar(0), " >> 2)", Newline());
+      switch (expr.opcode) {
+        case Opcode::I32Load:
+        case Opcode::I64Load32S:
+          Write(StackVar(0, result_type), " = mem.GetSignedLong(", StackVar(0), " >> 2)", Newline());
+          break;
+        case Opcode::I64Load32U:
+          Write(StackVar(0, result_type),
+            " = mem.GetSignedLong(", StackVar(0), " >> 2) And &HFFFFFFFF&", Newline());
+          break;
+        case Opcode::I64Load:
+          Write(StackVar(0), " >>= 2", Newline());
+          Write(StackVar(0, result_type),
+            " = (mem.GetSignedLong(", StackVar(0), ") And &HFFFFFFFF&) + (mem.GetSignedLong(", StackVar(0), " + 1) << 32&)", Newline());
+          break;
+        default:
+          BRS_UNREACHABLE;
+      }
       Write(CloseBrace(), "End If", Newline());
     }
     DropTypes(1);
@@ -2125,8 +2153,7 @@ void CWriter::Write(const LoadExpr& expr) {
   }
 
   // Optimize for where we can use GetSignedByte.
-  // TODO(trevor): Also optimize I64Load8S but convert to LongInteger.
-  if (expr.opcode == Opcode::I32Load8S) {
+  if (expr.opcode == Opcode::I32Load8S || expr.opcode == Opcode::I64Load8S) {
     Write(StackVar(0, result_type), " = mem.GetSignedByte(", StackVar(0));
     if (expr.offset != 0) {
       Write(" + ", expr.offset);
@@ -2137,7 +2164,7 @@ void CWriter::Write(const LoadExpr& expr) {
     return;
   }
 
-  if (expr.opcode == Opcode::I32Load16S) {
+  if (expr.opcode == Opcode::I32Load16S || expr.opcode == Opcode::I64Load16S) {
     WriteExprReplacement(expr.opcode, 1, expr.offset,
       "$out0 = mem[$in0$offset0] + (mem[$in0$offset1] << 8)\n"
       "If $out0 > &H7FFF Then $out0 = $out0 + &HFFFF0000\n");
@@ -2146,15 +2173,8 @@ void CWriter::Write(const LoadExpr& expr) {
 
   const char* func = nullptr;
   switch (expr.opcode) {
-    case Opcode::I64Load: func = "I64Load"; break;
     case Opcode::F32Load: func = "F32Load"; break;
     case Opcode::F64Load: func = "F64Load"; break;
-    case Opcode::I64Load8S: func = "I64Load8S"; break;
-    case Opcode::I64Load8U: func = "I64Load8U"; break;
-    case Opcode::I64Load16S: func = "I64Load16S"; break;
-    case Opcode::I64Load16U: func = "I64Load16U"; break;
-    case Opcode::I64Load32S: func = "I64Load32S"; break;
-    case Opcode::I64Load32U: func = "I64Load32U"; break;
     default:
       BRS_UNREACHABLE;
   }
