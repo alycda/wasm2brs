@@ -2,7 +2,7 @@
 rm -rf duktape
 DIR=$(pwd)
 cd $DUKTAPE
-python tools/configure.py \
+python2 tools/configure.py \
     --source-directory src-input \
     --output-directory "$DIR/duktape" \
     --config-metadata config \
