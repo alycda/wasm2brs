@@ -259,7 +259,7 @@ class CWriter {
     Allowed,
   };
 
-  void WriteSimpleUnaryExpr(Opcode, const char* op);
+  void WriteSimpleUnaryExpr(Opcode, const char* op = "");
   void WriteInfixBinaryExpr(Opcode,
                             const char* op,
                             AssignOp = AssignOp::Disallowed);
@@ -1941,23 +1941,23 @@ void CWriter::Write(const ConvertExpr& expr) {
       break;
 
     case Opcode::I32WrapI64:
-      WriteSimpleUnaryExpr(expr.opcode, "I32WrapI64");
+      WriteSimpleUnaryExpr(expr.opcode);
       break;
 
     case Opcode::I32TruncF32S:
-      WriteSimpleUnaryExpr(expr.opcode, "I32TruncF32S");
+      WriteSimpleUnaryExpr(expr.opcode);
       break;
 
     case Opcode::I64TruncF32S:
-      WriteSimpleUnaryExpr(expr.opcode, "I64TruncF32S");
+      WriteSimpleUnaryExpr(expr.opcode);
       break;
 
     case Opcode::I32TruncF64S:
-      WriteSimpleUnaryExpr(expr.opcode, "I32TruncF64S");
+      WriteSimpleUnaryExpr(expr.opcode);
       break;
 
     case Opcode::I64TruncF64S:
-      WriteSimpleUnaryExpr(expr.opcode, "I64TruncF64S");
+      WriteSimpleUnaryExpr(expr.opcode);
       break;
 
     case Opcode::I32TruncF32U:
@@ -1977,7 +1977,7 @@ void CWriter::Write(const ConvertExpr& expr) {
       break;
 
     case Opcode::I32TruncSatF32S:
-      WriteSimpleUnaryExpr(expr.opcode, "I32TruncSatF32S");
+      WriteSimpleUnaryExpr(expr.opcode);
       break;
 
     case Opcode::I64TruncSatF32S:
@@ -1985,7 +1985,7 @@ void CWriter::Write(const ConvertExpr& expr) {
       break;
 
     case Opcode::I32TruncSatF64S:
-      WriteSimpleUnaryExpr(expr.opcode, "I32TruncSatF64S");
+      WriteSimpleUnaryExpr(expr.opcode);
       break;
 
     case Opcode::I64TruncSatF64S:
@@ -2009,11 +2009,11 @@ void CWriter::Write(const ConvertExpr& expr) {
       break;
 
     case Opcode::F32ConvertI32S:
-      WriteSimpleUnaryExpr(expr.opcode, "F32ConvertI32S");
+      WriteSimpleUnaryExpr(expr.opcode);
       break;
 
     case Opcode::F32ConvertI64S:
-      WriteSimpleUnaryExpr(expr.opcode, "F32ConvertI64S");
+      WriteSimpleUnaryExpr(expr.opcode);
       break;
 
     case Opcode::F32ConvertI32U:
@@ -2021,7 +2021,7 @@ void CWriter::Write(const ConvertExpr& expr) {
       break;
 
     case Opcode::F32DemoteF64:
-      WriteSimpleUnaryExpr(expr.opcode, "F32DemoteF64");
+      WriteSimpleUnaryExpr(expr.opcode);
       break;
 
     case Opcode::F32ConvertI64U:
@@ -2029,11 +2029,11 @@ void CWriter::Write(const ConvertExpr& expr) {
       break;
 
     case Opcode::F64ConvertI32S:
-      WriteSimpleUnaryExpr(expr.opcode, "F64ConvertI32S");
+      WriteSimpleUnaryExpr(expr.opcode);
       break;
 
     case Opcode::F64ConvertI64S:
-      WriteSimpleUnaryExpr(expr.opcode, "F64ConvertI64S");
+      WriteSimpleUnaryExpr(expr.opcode);
       break;
 
     case Opcode::F64ConvertI32U:
@@ -2041,7 +2041,7 @@ void CWriter::Write(const ConvertExpr& expr) {
       break;
 
     case Opcode::F64PromoteF32:
-      WriteSimpleUnaryExpr(expr.opcode, "F64PromoteF32");
+      WriteSimpleUnaryExpr(expr.opcode);
       break;
 
     case Opcode::F64ConvertI64U:
