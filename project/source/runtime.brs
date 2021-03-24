@@ -954,6 +954,9 @@ Function I32Load(buffer as Object, index as Integer) as Integer
     Return buffer[index] + (buffer[index + 1] << 8) + (buffer[index + 2] << 16) + (buffer[index + 3] << 24)
 End Function
 Function I64Load(buffer as Object, index as Integer) as LongInteger
+    ' Note: I believe we don't need to use & until byte 3 (<< 24) because we don't worry about sign extension until then
+    ' e.g. an I32 FFFFFFFF converts to an I64 as FFFFFFFFFFFFFFFF with sign extension, instead of 00000000FFFFFFFF
+    ' however 00FFFFFF will convert to 0000000000FFFFFF because it does not need to sign extend
     Return (buffer[index]) + (buffer[index + 1] << 8&) + (buffer[index + 2] << 16&) + (buffer[index + 3] << 24&) + (buffer[index + 4] << 32&) + (buffer[index + 5] << 40&) + (buffer[index + 6] << 48&) + (buffer[index + 7] << 56&)
 End Function
 Function F32Load(buffer as Object, index as Integer) as Float
