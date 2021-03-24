@@ -1937,7 +1937,7 @@ void CWriter::Write(const ConvertExpr& expr) {
       break;
 
     case Opcode::I64ExtendI32U:
-      WriteSimpleUnaryExpr(expr.opcode, "I64ExtendI32U");
+      WriteExprReplacement(expr.opcode, 1, 0, "$out0 = $in0 And &HFFFFFFFF&\n");
       break;
 
     case Opcode::I32WrapI64:
