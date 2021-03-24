@@ -182,10 +182,9 @@ class CWriter {
   static std::string AddressOf(const std::string&);
   static std::string Deref(const std::string&);
 
-  static char MangleType(Type);
   static std::string LegalizeNameNoAddons(string_view);
   std::string LegalizeName(const std::string& prefix, const std::string& module_name, string_view name);
-  std::string DefineName(SymbolSet*, string_view, const std::string& prefix = std::string());
+  std::string DefineName(SymbolSet*, string_view, const std::string& prefix = std::string(), Type type = Type::Any);
   std::string DefineImportName(const std::string& name,
                                string_view module_name,
                                string_view mangled_field_name);
@@ -402,19 +401,6 @@ std::string CWriter::Deref(const std::string& s) {
   return s;
 }
 
-// static
-char CWriter::MangleType(Type type) {
-  switch (type) {
-    case Type::I32: return 'i';
-    case Type::I64: return 'j';
-    case Type::F32: return 'f';
-    case Type::F64: return 'd';
-    default:
-      BRS_UNREACHABLE;
-      return '_';
-  }
-}
-
 std::string CWriter::LegalizeNameNoAddons(string_view name) {
   std::string result;
   for (size_t i = 0; i < name.size(); ++i)
@@ -441,7 +427,7 @@ std::string CWriter::LegalizeName(const std::string& prefix, const std::string& 
     : output + "_" + std::to_string(adler32((const uint8_t*)name.begin(), name.length()));
 }
 
-std::string CWriter::DefineName(SymbolSet* set, string_view name, const std::string& prefix) {
+std::string CWriter::DefineName(SymbolSet* set, string_view name, const std::string& prefix, Type type) {
   std::string legal = LegalizeName(prefix, options_.name_prefix, name);
   if (set->find(legal) != set->end()) {
     std::string base = legal + "_";
@@ -450,6 +436,17 @@ std::string CWriter::DefineName(SymbolSet* set, string_view name, const std::str
       legal = base + std::to_string(count++);
     } while (set->find(legal) != set->end());
   }
+
+  switch (type) {
+    case Type::I32: legal += '%'; break;
+    case Type::I64: legal += '&'; break;
+    case Type::F32: legal += '!'; break;
+    case Type::F64: legal += '#'; break;
+    case Type::Any: break;
+    default:
+      BRS_UNREACHABLE;
+  }
+
   set->insert(legal);
   return legal;
 }
@@ -486,7 +483,7 @@ std::string CWriter::DefineLocalScopeName(const std::string& name) {
 std::string CWriter::DefineStackVarName(Index index,
                                         Type type,
                                         string_view name) {
-  std::string unique = DefineName(&local_syms_, name);
+  std::string unique = DefineName(&local_syms_, name, std::string(), type);
   StackTypePair stp = {index, type};
   stack_var_sym_map_.insert(StackVarSymbolMap::value_type(stp, unique));
   return unique;
@@ -642,7 +639,7 @@ void CWriter::Write(const StackVar& sv) {
   StackTypePair stp = {index, type};
   auto iter = stack_var_sym_map_.find(stp);
   if (iter == stack_var_sym_map_.end()) {
-    std::string name = MangleType(type) + std::to_string(index);
+    std::string name = std::to_string(index);
     Write(DefineStackVarName(index, type, name));
   } else {
     Write(iter->second);
