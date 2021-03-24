@@ -112,6 +112,21 @@ build/mandelbrot/mandelbrot.wasm: samples/mandelbrot/mandelbrot.c
 	mkdir -p build/mandelbrot
 	clang -Ofast --target=wasm32 -nostdlib -Wl,--no-entry samples/mandelbrot/mandelbrot.c -o ./build/mandelbrot/mandelbrot.wasm
 
+# --- react
+react: build/javascript/react-wasm.out.brs
+	$(call clean-project)
+	cp build/javascript/react-wasm.out*.brs project/source/
+	cp samples/javascript/javascript.brs project/source/javascript.out.brs
+	cp samples/javascript/manifest project/manifest
+
+build/javascript/react-wasm.out.brs: build/javascript/react.wasm build/wasm2brs/wasm2brs
+	./build/wasm2brs/third_party/binaryen/bin/wasm-ctor-eval -c pre_initialize -o ./build/javascript/react-ctor.wasm --debuginfo ./build/javascript/react.wasm
+	./build/wasm2brs/third_party/binaryen/bin/wasm-opt -g -O4 ./build/javascript/react-ctor.wasm -o ./build/javascript/react-opt.wasm
+	./build/wasm2brs/wasm2brs -o build/javascript/react-wasm.out.brs ./build/javascript/react-opt.wasm
+
+build/javascript/react.wasm: build/javascript/Makefile FORCE
+	GNUMAKEFLAGS=--no-print-directory cmake --build ./build/javascript --parallel
+
 # --- javascript
 javascript: build/javascript/javascript-wasm.out.brs
 	$(call clean-project)
