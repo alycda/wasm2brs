@@ -1,5 +1,6 @@
 #include "duktape/duktape.h"
 #include "duktape/duk_console.h"
+#include "controlled_time.h"
 #include <iostream>
 #include <string>
 
@@ -36,6 +37,7 @@ void print_top_and_pop(duk_context* ctx) {
 }
 
 int main(void) {
+    internal_date_initialized = 1;
     duk_context* ctx = duk_create_heap_default();
     std::cout << intro;
     for (;;) {

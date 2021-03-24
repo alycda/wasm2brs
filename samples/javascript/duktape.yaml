@@ -1,3 +1,3 @@
 DUK_USE_EXEC_PREFER_SIZE: true
-
 DUK_USE_HSTRING_ARRIDX: false
+DUK_USE_DATE_GET_NOW: "internal_date_get_now\n#include \"controlled_time.h\""
