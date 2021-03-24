@@ -1,4 +1,5 @@
 #include "duktape/duktape.h"
+#include "duktape/duk_console.h"
 #include <iostream>
 #include <string>
 

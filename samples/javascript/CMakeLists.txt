@@ -5,5 +5,5 @@ add_compile_options(-Oz)
 
 add_compile_options(-Wno-macro-redefined -Wno-writable-strings -Wno-return-type -Wno-visibility)
 
-add_executable(javascript javascript.cc duktape/duktape.c)
+add_executable(javascript javascript.cc duktape/duktape.c duktape/duk_console.c)
 target_include_directories(javascript PRIVATE ./duktape ../../include)

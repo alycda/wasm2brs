@@ -8,3 +8,6 @@ python2 tools/configure.py \
     --config-metadata config \
     --option-file "$DIR/duktape.yaml" \
     --rom-support
+
+cp extras/console/duk_console.c "$DIR/duktape"
+cp extras/console/duk_console.h "$DIR/duktape"
