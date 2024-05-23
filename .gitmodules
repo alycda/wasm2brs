@@ -7,3 +7,6 @@
 [submodule "third_party/binaryen"]
 	path = third_party/binaryen
 	url = https://github.com/MotleyCoderDev/binaryen.git
+[submodule "samples/hermes/third_party/hermes"]
+	path = samples/hermes/third_party/hermes
+	url = https://github.com/facebook/hermes.git
