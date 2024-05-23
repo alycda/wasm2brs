@@ -1,0 +1,39 @@
+#pragma once
+#include <mutex>
+
+namespace std {
+enum class cv_status {
+    no_timeout,
+    timeout  
+};
+
+  class condition_variable {
+  public:
+    condition_variable() {}
+    ~condition_variable() {}
+ 
+    condition_variable(const condition_variable&) = delete;
+    condition_variable& operator=(const condition_variable&) = delete;
+ 
+    void notify_one() noexcept {}
+    void notify_all() noexcept {}
+    void wait(unique_lock<mutex>& lock) {}
+    template<class Pred>
+      void wait(unique_lock<mutex>& lock, Pred pred) {}
+    template<class Clock, class Duration>
+      cv_status wait_until(unique_lock<mutex>& lock,
+                           const chrono::time_point<Clock, Duration>& abs_time) {}
+    template<class Clock, class Duration, class Pred>
+      bool wait_until(unique_lock<mutex>& lock,
+                      const chrono::time_point<Clock, Duration>& abs_time, Pred pred) {}
+    template<class Rep, class Period>
+      cv_status wait_for(unique_lock<mutex>& lock,
+                         const chrono::duration<Rep, Period>& rel_time) {}
+    template<class Rep, class Period, class Pred>
+      bool wait_for(unique_lock<mutex>& lock,
+                    const chrono::duration<Rep, Period>& rel_time, Pred pred) {}
+ 
+    using native_handle_type = void*;
+    native_handle_type native_handle() { return nullptr; }
+  };
+}

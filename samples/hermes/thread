@@ -1,0 +1,67 @@
+#pragma once
+
+namespace std
+{
+
+class thread
+{
+public:
+    class id;
+    typedef void* native_handle_type;
+
+    thread() noexcept {}
+    template <class F, class ...Args> explicit thread(F&& f, Args&&... args) {}
+    ~thread() {}
+
+    thread(const thread&) = delete;
+    thread(thread&& t) noexcept {}
+
+    thread& operator=(const thread&) = delete;
+    thread& operator=(thread&& t) noexcept { return *this; }
+
+    void swap(thread& t) noexcept {}
+
+    bool joinable() const noexcept { return false; }
+    void join() {}
+    void detach() {}
+    id get_id() const noexcept;
+    native_handle_type native_handle() { return nullptr; }
+
+    static unsigned hardware_concurrency() noexcept { return 1; }
+};
+
+void swap(thread& x, thread& y) noexcept;
+
+class thread::id
+{
+public:
+    id() noexcept;
+};
+
+bool operator==(thread::id x, thread::id y) noexcept;
+bool operator!=(thread::id x, thread::id y) noexcept;
+bool operator< (thread::id x, thread::id y) noexcept;
+bool operator<=(thread::id x, thread::id y) noexcept;
+bool operator> (thread::id x, thread::id y) noexcept;
+bool operator>=(thread::id x, thread::id y) noexcept;
+
+template<class charT, class traits>
+basic_ostream<charT, traits>&
+operator<<(basic_ostream<charT, traits>& out, thread::id id);
+
+namespace this_thread
+{
+
+thread::id get_id() noexcept;
+
+void yield() noexcept;
+
+template <class Clock, class Duration>
+void sleep_until(const chrono::time_point<Clock, Duration>& abs_time);
+
+template <class Rep, class Period>
+void sleep_for(const chrono::duration<Rep, Period>& rel_time);
+
+}  // this_thread
+
+}  // std

@@ -1,0 +1,2 @@
+./build/wasm2brs/third_party/binaryen/bin/wasm-opt -g -Oz --ignore-implicit-traps --flatten --dfo --rereloop -Oz samples/hermes/build/bin/hermes -o samples/hermes/build/bin/hermes-opt.wasm
+./build/wasm2brs/wasm2brs -o samples/hermes/build/bin/hermes-wasm.out.brs samples/hermes/build/bin/hermes-opt.wasm

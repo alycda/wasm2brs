@@ -8,4 +8,4 @@ function hello() {
 for (var i = 0; i < 100; ++i) {
   hello();
 }
-console.log("DONE");
+console.log("DONE NOT THE OTHER ONE");

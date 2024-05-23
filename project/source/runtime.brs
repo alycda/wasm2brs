@@ -35,7 +35,7 @@ Function FloatNegativeZero() as Float
 End Function
 
 Function DoubleInf() as Double
-    Return FloatInf()
+    Return 1e39!
 End Function
 
 Function DoubleNan() as Double

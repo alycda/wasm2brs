@@ -42,6 +42,9 @@
 
 namespace wabt {
 
+bool label_limit_reached = false;
+bool variable_limit_reached = false;
+
 namespace {
 
 class VarHasher {
@@ -1173,15 +1176,15 @@ void CWriter::Write(const Func& func) {
   if (label_count_ > label_soft_limit) {
     std::cerr << "Function " << func.name << " had " << label_count_ << " labels (soft limit " << label_soft_limit << ", hard limit " << label_hard_limit << " due to BrightScript)" << std::endl;
     if (label_count_ > label_hard_limit) {
-      BRS_ABORT("Label limit reached");
+      label_limit_reached = true;
     }
   }
   label_count_ = 0;
   const size_t variable_limit = 254;
   const size_t variable_count = func.GetNumParamsAndLocals() + stack_var_sym_map_.size();
-  if (variable_count > 254) {
+  if (variable_count > variable_limit) {
     std::cerr << "Function " << func.name << " had " << variable_count << " variables (limit " << variable_limit << " due to BrightScript)" << std::endl;
-    BRS_ABORT("Variable limit reached");
+    variable_limit_reached = true;
   }
 
   EndChunk();
@@ -2509,6 +2512,12 @@ void CWriter::WriteModule(const Module& module) {
 Result WriteBrs(const Module* module, const WriteCOptions& options) {
   CWriter c_writer(options);
   c_writer.WriteModule(*module);
+  if (label_limit_reached) {
+    BRS_ABORT("Label limit reached");
+  }
+  if (variable_limit_reached) {
+    BRS_ABORT("Variable limit reached");
+  }
   return Result::Ok;
 }
 

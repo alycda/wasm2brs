@@ -1,0 +1,2 @@
+./build/wasm2brs/third_party/binaryen/bin/wasm-opt -g -Oz --flatten --rereloop -Oz samples/hermes/build/bin/hvm -o samples/hermes/build/bin/hvm-opt2.wasm
+./build/wasm2brs/wasm2brs -o project/source/hvm-wasm2.out.brs samples/hermes/build/bin/hvm-opt2.wasm

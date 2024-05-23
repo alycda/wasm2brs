@@ -170,6 +170,15 @@ Function wasi_snapshot_preview1_fd_write(fd As Integer, iovs_pCiovec As Integer,
     Return 0 ' success
 End Function
 
+Function wasi_snapshot_preview1_fd_pread(fd As Integer, iovs_pCiovec As Integer, iovs_len As Integer, offset As LongInteger, nread_pSize As Integer) As Integer
+    file = m.wasi_fds[fd]
+    position = file.position
+    file.position = offset
+    result = wasi_snapshot_preview1_fd_read(fd, iovs_pCiovec, iovs_len, nread_pSize)
+    file.position = position
+    Return result
+End Function
+
 Function wasi_snapshot_preview1_fd_read(fd As Integer, iovs_pCiovec As Integer, iovs_len As Integer, nread_pSize As Integer) As Integer
     nread = 0
     file = m.wasi_fds[fd]
@@ -205,10 +214,7 @@ Function wasi_snapshot_preview1_path_open(fd As Integer, dirflags As Integer, pa
     Return 0 ' success
 End Function
 
-Function wasi_snapshot_preview1_path_filestat_get(fd As Integer, flags As Integer, path_pU8 As Integer, path_len_Size As Integer, buf_pFilestat As Integer) As Integer
-    dir = m.wasi_fds[fd]
-    If dir = Invalid Return 8 ' badf
-    path = dir.path + StringFromBytes(m.wasi_memory, path_pU8, path_len_Size)
+Function wasi_helper_stat(path as String, buf_pFilestat As Integer) as Integer
     stats = m.wasi_filesystem.Stat(path)
     If stats.type = Invalid Return 44 ' noent
     If stats.type = "directory" Then
@@ -216,7 +222,7 @@ Function wasi_snapshot_preview1_path_filestat_get(fd As Integer, flags As Intege
     Else
         filetype = wasi_enum_filetype_regular_file()
     End If
-    
+
     ctime = wasi_helper_datetime_to_nanoseconds(stats.ctime)
     mtime = wasi_helper_datetime_to_nanoseconds(stats.mtime)
 
@@ -229,6 +235,19 @@ Function wasi_snapshot_preview1_path_filestat_get(fd As Integer, flags As Intege
     I64Store(m.wasi_memory, buf_pFilestat + 48, mtime)
     I64Store(m.wasi_memory, buf_pFilestat + 56, ctime)
     Return 0
+End Function
+
+Function wasi_snapshot_preview1_fd_filestat_get(fd As Integer, buf_pFilestat As Integer) As Integer
+    file = m.wasi_fds[fd]
+    If file = Invalid Return 8 ' badf
+    Return wasi_helper_stat(file.path, buf_pFilestat)
+End Function
+
+Function wasi_snapshot_preview1_path_filestat_get(fd As Integer, flags As Integer, path_pU8 As Integer, path_len_Size As Integer, buf_pFilestat As Integer) As Integer
+    dir = m.wasi_fds[fd]
+    If dir = Invalid Return 8 ' badf
+    path = dir.path + StringFromBytes(m.wasi_memory, path_pU8, path_len_Size)
+    Return wasi_helper_stat(path, buf_pFilestat)
 End Function
 
 Function wasi_snapshot_preview1_fd_close(fd As Integer) As Integer

@@ -1,12 +1,15 @@
 // IE11 has an incomplete implementation of Set which doesn't allow you to iterate the keys
 // so this code assumes you want a full implementation and will redefine Set if the half
 // implementation is present
-
-window = {};
-
-Duktape.errThrow = function(err) {
-  console.warn(err.stack);
+if (typeof print === "undefined") {
+  print = console.log;
 }
+if (typeof navigator !== "undefined") {
+  print = console.log;
+}
+print("BEGIN")
+window = {};
+console = {log: print, warn: print, error: print};
 
 if (typeof Set === "undefined" || typeof Set.prototype.keys !== "function") {
   var Set = (function() {
@@ -4120,3 +4123,15 @@ if (typeof Set === "undefined" || typeof Set.prototype.keys !== "function") {
   exports.version = ReactVersion;
 
 })));
+
+function hello() {
+  return /*#__PURE__*/React.createElement("div", {
+    style: 5
+  }, /*#__PURE__*/React.createElement("td", null, "Hello world!"), "this is a test");
+}
+
+console.log("START");
+for (var i = 0; i < 2000000; ++i) {
+hello();
+}
+console.log("DONE");

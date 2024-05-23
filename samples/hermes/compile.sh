@@ -1,0 +1,3 @@
+cd "$(dirname "$0")"
+cd build
+make hvm -j
